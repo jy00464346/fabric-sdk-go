@@ -8,7 +8,7 @@ package orderer
 
 import (
 	reqContext "context"
-	"crypto/x509"
+	//"crypto/x509"
 	"io"
 	"time"
 
@@ -16,7 +16,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cast"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
+	//"google.golang.org/grpc/credentials"
+	credentials "github.com/tjfoc/gmtls/gmcredentials"
 	"google.golang.org/grpc/keepalive"
 	grpcstatus "google.golang.org/grpc/status"
 
@@ -29,6 +30,7 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config/endpoint"
 	"github.com/hyperledger/fabric-sdk-go/third_party/github.com/hyperledger/fabric/protos/common"
 	ab "github.com/hyperledger/fabric-sdk-go/third_party/github.com/hyperledger/fabric/protos/orderer"
+	"github.com/tjfoc/gmsm/sm2"
 )
 
 var logger = logging.NewLogger("fabsdk/fab")
@@ -44,7 +46,7 @@ type Orderer struct {
 	config         fab.EndpointConfig
 	url            string
 	serverName     string
-	tlsCACert      *x509.Certificate
+	tlsCACert      *sm2.Certificate
 	grpcDialOption []grpc.DialOption
 	kap            keepalive.ClientParameters
 	dialTimeout    time.Duration
@@ -81,7 +83,7 @@ func New(config fab.EndpointConfig, opts ...Option) (*Orderer, error) {
 		if err != nil {
 			return nil, err
 		}
-		tlsConfig.VerifyPeerCertificate = func(rawCerts [][]byte, verifiedChains [][]*x509.Certificate) error {
+		tlsConfig.VerifyPeerCertificate = func(rawCerts [][]byte, verifiedChains [][]*sm2.Certificate) error {
 			return verifier.VerifyPeerCertificate(rawCerts, verifiedChains)
 		}
 
@@ -110,7 +112,7 @@ func WithURL(url string) Option {
 }
 
 // WithTLSCert is a functional option for the orderer.New constructor that configures the orderer's TLS certificate
-func WithTLSCert(tlsCACert *x509.Certificate) Option {
+func WithTLSCert(tlsCACert *sm2.Certificate) Option {
 	return func(o *Orderer) error {
 		o.tlsCACert = tlsCACert
 

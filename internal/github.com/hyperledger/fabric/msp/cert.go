@@ -23,7 +23,6 @@ package msp
 import (
 	"bytes"
 	"crypto/ecdsa"
-	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/asn1"
 	"encoding/pem"
@@ -31,8 +30,10 @@ import (
 	"math/big"
 	"time"
 
-	utils "github.com/hyperledger/fabric-sdk-go/internal/github.com/hyperledger/fabric/sdkpatch/cryptosuitebridge"
+	//utils "github.com/hyperledger/fabric-sdk-go/internal/github.com/hyperledger/fabric/sdkpatch/cryptosuitebridge"
+	"github.com/hyperledger/fabric-sdk-go/internal/github.com/hyperledger/fabric/bccsp/gm"
 	"github.com/pkg/errors"
+	"github.com/tjfoc/gmsm/sm2"
 )
 
 type validity struct {
@@ -66,18 +67,18 @@ type tbsCertificate struct {
 	Extensions         []pkix.Extension `asn1:"optional,explicit,tag:3"`
 }
 
-func isECDSASignedCert(cert *x509.Certificate) bool {
-	return cert.SignatureAlgorithm == x509.ECDSAWithSHA1 ||
-		cert.SignatureAlgorithm == x509.ECDSAWithSHA256 ||
-		cert.SignatureAlgorithm == x509.ECDSAWithSHA384 ||
-		cert.SignatureAlgorithm == x509.ECDSAWithSHA512
+func isECDSASignedCert(cert *sm2.Certificate) bool {
+	return cert.SignatureAlgorithm == sm2.ECDSAWithSHA1 ||
+		cert.SignatureAlgorithm == sm2.ECDSAWithSHA256 ||
+		cert.SignatureAlgorithm == sm2.ECDSAWithSHA384 ||
+		cert.SignatureAlgorithm == sm2.ECDSAWithSHA512
 }
 
 // sanitizeECDSASignedCert checks that the signatures signing a cert
 // is in low-S. This is checked against the public key of parentCert.
 // If the signature is not in low-S, then a new certificate is generated
 // that is equals to cert but the signature that is in low-S.
-func sanitizeECDSASignedCert(cert *x509.Certificate, parentCert *x509.Certificate) (*x509.Certificate, error) {
+func sanitizeECDSASignedCert(cert *sm2.Certificate, parentCert *sm2.Certificate) (*sm2.Certificate, error) {
 	if cert == nil {
 		return nil, errors.New("certificate must be different from nil")
 	}
@@ -85,7 +86,7 @@ func sanitizeECDSASignedCert(cert *x509.Certificate, parentCert *x509.Certificat
 		return nil, errors.New("parent certificate must be different from nil")
 	}
 
-	expectedSig, err := utils.SignatureToLowS(parentCert.PublicKey.(*ecdsa.PublicKey), cert.Signature)
+	expectedSig, err := gm.SignatureToLowS(parentCert.PublicKey.(*ecdsa.PublicKey), cert.Signature)
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +101,7 @@ func sanitizeECDSASignedCert(cert *x509.Certificate, parentCert *x509.Certificat
 	//    the lower level interface that represent an x509 certificate
 	//    encoding
 	var newCert certificate
-	newCert, err = certFromX509Cert(cert)
+	newCert, err = certFromSM2Cert(cert)
 	if err != nil {
 		return nil, err
 	}
@@ -115,11 +116,11 @@ func sanitizeECDSASignedCert(cert *x509.Certificate, parentCert *x509.Certificat
 		return nil, errors.Wrap(err, "marshalling of the certificate failed")
 	}
 
-	// 4. parse newRaw to get an x509 certificate
-	return x509.ParseCertificate(newRaw)
+	// 4. parse newRaw to get an sm2 certificate
+	return sm2.ParseCertificate(newRaw)
 }
 
-func certFromX509Cert(cert *x509.Certificate) (certificate, error) {
+func certFromSM2Cert(cert *sm2.Certificate) (certificate, error) {
 	var newCert certificate
 	_, err := asn1.Unmarshal(cert.Raw, &newCert)
 	if err != nil {
@@ -142,10 +143,10 @@ func (c certificate) String() string {
 	return string(b)
 }
 
-// certToPEM converts the given x509.Certificate to a PEM
+// certToPEM converts the given sm2.Certificate to a PEM
 // encoded string
-func certToPEM(certificate *x509.Certificate) string {
-	cert, err := certFromX509Cert(certificate)
+func certToPEM(certificate *sm2.Certificate) string {
+	cert, err := certFromSM2Cert(certificate)
 	if err != nil {
 		mspIdentityLogger.Warning("Failed converting certificate to asn1", err)
 		return ""

@@ -7,9 +7,10 @@ SPDX-License-Identifier: Apache-2.0
 package tls
 
 import (
-	"crypto/x509"
+	//"crypto/x509"
 	"encoding/pem"
 	"errors"
+	"github.com/tjfoc/gmsm/sm2"
 	"strconv"
 	"testing"
 	"time"
@@ -20,7 +21,7 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/fab"
 )
 
-var goodCert = &x509.Certificate{
+var goodCert = &sm2.Certificate{
 	RawSubject: []byte("Good header"),
 	Raw:        []byte("Good cert"),
 }
@@ -147,7 +148,7 @@ func TestTLSCAConfigWithMultipleCerts(t *testing.T) {
 
 }
 
-func verifyCertPoolInstance(t *testing.T, pool *x509.CertPool, fabPool fab.CertPool, numberOfCertsInPool, numberOfCerts, numberOfCertsByName, numberOfSubjects int, dirty int32) {
+func verifyCertPoolInstance(t *testing.T, pool *sm2.CertPool, fabPool fab.CertPool, numberOfCertsInPool, numberOfCerts, numberOfCertsByName, numberOfSubjects int, dirty int32) {
 	assert.NotNil(t, fabPool)
 	tlsCertPool := fabPool.(*certPool)
 	assert.Equal(t, dirty, tlsCertPool.dirty)
@@ -303,7 +304,7 @@ func TestConcurrent(t *testing.T) {
 	readDone := make(chan bool)
 
 	for i := 0; i < concurrency; i++ {
-		go func(c *x509.Certificate) {
+		go func(c *sm2.Certificate) {
 			tlsCertPool.Add(c)
 			_, err := tlsCertPool.Get()
 			assert.NoError(t, err)
@@ -338,10 +339,10 @@ func TestConcurrent(t *testing.T) {
 	assert.Len(t, certPool.Subjects(), concurrency+systemCerts)
 }
 
-func createNCerts(n int) []*x509.Certificate {
-	var certs []*x509.Certificate
+func createNCerts(n int) []*sm2.Certificate {
+	var certs []*sm2.Certificate
 	for i := 0; i < n; i++ {
-		cert := &x509.Certificate{
+		cert := &sm2.Certificate{
 			RawSubject: []byte(strconv.Itoa(i)),
 			Raw:        []byte(strconv.Itoa(i)),
 		}
@@ -382,7 +383,7 @@ func BenchmarkTLSCertPoolDifferentCert(b *testing.B) {
 	}
 }
 
-func getCertFromPEMBytes(pemCerts []byte) (*x509.Certificate, error) {
+func getCertFromPEMBytes(pemCerts []byte) (*sm2.Certificate, error) {
 	for len(pemCerts) > 0 {
 		var block *pem.Block
 		block, pemCerts = pem.Decode(pemCerts)
@@ -393,7 +394,7 @@ func getCertFromPEMBytes(pemCerts []byte) (*x509.Certificate, error) {
 			continue
 		}
 
-		cert, err := x509.ParseCertificate(block.Bytes)
+		cert, err := sm2.ParseCertificate(block.Bytes)
 		if err != nil {
 			continue
 		}

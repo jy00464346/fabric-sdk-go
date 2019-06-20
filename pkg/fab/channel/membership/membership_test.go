@@ -11,7 +11,9 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
-	"crypto/x509"
+	"github.com/tjfoc/gmsm/sm2"
+
+	//"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/asn1"
 	"encoding/pem"
@@ -331,11 +333,11 @@ func generateSelfSignedCert(t *testing.T, now time.Time) string {
 	assert.NoError(t, err)
 
 	// Generate a self-signed certificate
-	testExtKeyUsage := []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth}
+	testExtKeyUsage := []sm2.ExtKeyUsage{sm2.ExtKeyUsageClientAuth, sm2.ExtKeyUsageServerAuth}
 	testUnknownExtKeyUsage := []asn1.ObjectIdentifier{[]int{1, 2, 3}, []int{2, 59, 1}}
 	//extraExtensionData := []byte("extra extension")
 	commonName := "securekey.com"
-	template := x509.Certificate{
+	template := sm2.Certificate{
 		SerialNumber: big.NewInt(1),
 		Subject: pkix.Name{
 			CommonName:   commonName,
@@ -344,15 +346,15 @@ func generateSelfSignedCert(t *testing.T, now time.Time) string {
 		},
 		NotBefore:             now.Add(-1 * time.Hour),
 		NotAfter:              now.Add(1 * time.Hour),
-		SignatureAlgorithm:    x509.ECDSAWithSHA256,
+		SignatureAlgorithm:    sm2.ECDSAWithSHA256,
 		SubjectKeyId:          []byte{1, 2, 3, 4},
-		KeyUsage:              x509.KeyUsageCertSign,
+		KeyUsage:              sm2.KeyUsageCertSign,
 		ExtKeyUsage:           testExtKeyUsage,
 		UnknownExtKeyUsage:    testUnknownExtKeyUsage,
 		BasicConstraintsValid: true,
 		IsCA:                  true,
 	}
-	certRaw, err := x509.CreateCertificate(rand.Reader, &template, &template, &k.PublicKey, k)
+	certRaw, err := sm2.CreateCertificate(rand.Reader, &template, &template, &k.PublicKey, k)
 	assert.NoError(t, err)
 	if err != nil {
 		log.Fatalf("Failed to create certificate: %s", err)
@@ -418,7 +420,7 @@ func loadPrivateKey(path string) (interface{}, error) {
 	return key, nil
 }
 
-func loadCert(path string) (*x509.Certificate, error) {
+func loadCert(path string) (*sm2.Certificate, error) {
 
 	raw, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -430,10 +432,10 @@ func loadCert(path string) (*x509.Certificate, error) {
 		return nil, errors.New("failed to parse certificate PEM")
 	}
 
-	return x509.ParseCertificate(block.Bytes)
+	return sm2.ParseCertificate(block.Bytes)
 }
 
-func revokeCert(certToBeRevoked *x509.Certificate, parentCert *x509.Certificate, parentKey interface{}) ([]byte, error) {
+func revokeCert(certToBeRevoked *sm2.Certificate, parentCert *sm2.Certificate, parentKey interface{}) ([]byte, error) {
 
 	//Create a revocation record for the user
 	clientRevocation := pkix.RevokedCertificate{

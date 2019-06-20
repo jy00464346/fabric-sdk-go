@@ -38,6 +38,8 @@ require (
 	github.com/spf13/pflag v1.0.1 // indirect
 	github.com/spf13/viper v1.0.2
 	github.com/stretchr/testify v1.3.0
+	github.com/tjfoc/gmsm v1.0.2-0.20190307011822-c109473a90de
+	github.com/tjfoc/gmtls v0.0.0-20190410040214-00c069ec6494
 	golang.org/x/crypto v0.0.0-20180505025534-4ec37c66abab
 	golang.org/x/net v0.0.0-20190213061140-3a22650c66bd
 	google.golang.org/genproto v0.0.0-20190327125643-d831d65fe17d // indirect

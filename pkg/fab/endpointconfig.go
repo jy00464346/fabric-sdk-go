@@ -7,8 +7,8 @@ SPDX-License-Identifier: Apache-2.0
 package fab
 
 import (
-	"crypto/tls"
-	"crypto/x509"
+	//"crypto/tls"
+	//"crypto/x509"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -28,6 +28,8 @@ import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/util/pathvar"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
+	"github.com/tjfoc/gmsm/sm2"
+	tls "github.com/tjfoc/gmtls"
 )
 
 var logger = logging.NewLogger("fabsdk/fab")
@@ -1685,8 +1687,8 @@ func (c *EndpointConfig) verifyPeerConfig(p *fab.PeerConfig, peerName string, tl
 	return nil
 }
 
-func (c *EndpointConfig) loadTLSCerts() ([]*x509.Certificate, error) {
-	var certs []*x509.Certificate
+func (c *EndpointConfig) loadTLSCerts() ([]*sm2.Certificate, error) {
+	var certs []*sm2.Certificate
 	errs := multi.Errors{}
 
 	for _, peer := range c.networkPeers {

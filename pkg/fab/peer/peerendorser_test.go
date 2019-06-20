@@ -8,7 +8,9 @@ package peer
 
 import (
 	reqContext "context"
-	"crypto/x509"
+	"github.com/tjfoc/gmsm/sm2"
+
+	//"crypto/x509"
 	"fmt"
 	"reflect"
 	"testing"
@@ -208,7 +210,7 @@ func testProcessProposal(t *testing.T, url string) (*fab.TransactionProposalResp
 	return conn.ProcessTransactionProposal(ctx, mockProcessProposalRequest())
 }
 
-func getPeerEndorserRequest(url string, cert *x509.Certificate, serverHostOverride string,
+func getPeerEndorserRequest(url string, cert *sm2.Certificate, serverHostOverride string,
 	config fab.EndpointConfig, kap keepalive.ClientParameters, failFast bool, allowInsecure bool) *peerEndorserRequest {
 	return &peerEndorserRequest{
 		target:             url,

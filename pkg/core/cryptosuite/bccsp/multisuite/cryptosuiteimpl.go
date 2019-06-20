@@ -8,6 +8,7 @@ package multisuite
 
 import (
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/core"
+	"github.com/hyperledger/fabric-sdk-go/pkg/core/cryptosuite/bccsp/gm"
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/cryptosuite/bccsp/pkcs11"
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/cryptosuite/bccsp/sw"
 	"github.com/pkg/errors"
@@ -20,6 +21,8 @@ func GetSuiteByConfig(config core.CryptoSuiteConfig) (core.CryptoSuite, error) {
 		return sw.GetSuiteByConfig(config)
 	case "pkcs11":
 		return pkcs11.GetSuiteByConfig(config)
+	case "gm":
+		return gm.GetSuiteByConfig(config)
 	}
 
 	return nil, errors.Errorf("Unsupported security provider requested: %s", config.SecurityProvider())

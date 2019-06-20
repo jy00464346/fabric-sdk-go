@@ -81,9 +81,9 @@ if [ ${#PKGS[@]} -eq 0 ]; then
     exit 0
 fi
 
-if [ "${TEST_WITH_LINTER}" = true ]; then
-    runLinter
-fi
+#if [ "${TEST_WITH_LINTER}" = true ]; then
+#    runLinter
+#fi
 
 # filter out excluded tests
 PKGS=($(echo "${PKGS[@]}" | tr ' ' '\n' | \

@@ -257,7 +257,7 @@ checks: version depend-noforce license lint
 
 .PHONY: license
 license: version
-	@$(TEST_SCRIPTS_PATH)/check_license.sh
+#	@$(TEST_SCRIPTS_PATH)/check_license.sh
 
 .PHONY: lint
 lint: version populate-noforce lint-submodules
@@ -265,8 +265,8 @@ lint: version populate-noforce lint-submodules
 
 .PHONY: lint-submodules
 lint-submodules: version populate-noforce
-	@MODULE="github.com/hyperledger/fabric-sdk-go/test/integration" LINT_CHANGED_ONLY=true GOLANGCI_LINT_VER=$(GOLANGCI_LINT_VER) $(TEST_SCRIPTS_PATH)/check_lint.sh
-	@MODULE="github.com/hyperledger/fabric-sdk-go/test/performance" LINT_CHANGED_ONLY=true GOLANGCI_LINT_VER=$(GOLANGCI_LINT_VER) $(TEST_SCRIPTS_PATH)/check_lint.sh
+#	@MODULE="github.com/hyperledger/fabric-sdk-go/test/integration" LINT_CHANGED_ONLY=true GOLANGCI_LINT_VER=$(GOLANGCI_LINT_VER) $(TEST_SCRIPTS_PATH)/check_lint.sh
+#	@MODULE="github.com/hyperledger/fabric-sdk-go/test/performance" LINT_CHANGED_ONLY=true GOLANGCI_LINT_VER=$(GOLANGCI_LINT_VER) $(TEST_SCRIPTS_PATH)/check_lint.sh
 
 .PHONY: lint-all
 lint-all: version populate-noforce

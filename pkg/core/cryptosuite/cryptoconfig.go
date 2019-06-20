@@ -19,9 +19,9 @@ import (
 
 const (
 	defEnabled       = true
-	defHashAlgorithm = "SHA2"
+	defHashAlgorithm = "GMSM3"
 	defLevel         = 256
-	defProvider      = "SW"
+	defProvider      = "GM"
 	defSoftVerify    = true
 )
 

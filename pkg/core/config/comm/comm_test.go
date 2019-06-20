@@ -9,6 +9,7 @@ package comm
 import (
 	"bytes"
 	"encoding/hex"
+	"github.com/tjfoc/gmsm/sm2"
 	"path/filepath"
 	"strconv"
 	"testing"
@@ -19,7 +20,7 @@ import (
 
 	"reflect"
 
-	"crypto/x509"
+	//"crypto/x509"
 
 	"github.com/golang/mock/gomock"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/test/mockfab"
@@ -63,7 +64,7 @@ func TestTLSConfigHappyPath(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	testCertPool := x509.NewCertPool()
+	testCertPool := sm2.NewCertPool()
 	certs := createNCerts(1)
 	testCertPool.AddCert(certs[0])
 
@@ -93,10 +94,10 @@ func TestTLSConfigHappyPath(t *testing.T) {
 	}
 }
 
-func createNCerts(n int) []*x509.Certificate {
-	var certs []*x509.Certificate
+func createNCerts(n int) []*sm2.Certificate {
+	var certs []*sm2.Certificate
 	for i := 0; i < n; i++ {
-		cert := &x509.Certificate{
+		cert := &sm2.Certificate{
 			RawSubject: []byte(strconv.Itoa(i)),
 			Raw:        []byte(strconv.Itoa(i)),
 		}

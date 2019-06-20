@@ -8,8 +8,9 @@ package peer
 
 import (
 	reqContext "context"
+	"github.com/tjfoc/gmsm/sm2"
 
-	"crypto/x509"
+	//"crypto/x509"
 
 	"github.com/spf13/cast"
 	"google.golang.org/grpc"
@@ -26,7 +27,7 @@ var logger = logging.NewLogger("fabsdk/fab")
 // HFC sends endorsement proposals, transaction ordering or query requests.
 type Peer struct {
 	config      fab.EndpointConfig
-	certificate *x509.Certificate
+	certificate *sm2.Certificate
 	serverName  string
 	processor   fab.ProposalProcessor
 	mspID       string
@@ -88,7 +89,7 @@ func WithURL(url string) Option {
 }
 
 // WithTLSCert is a functional option for the peer.New constructor that configures the peer's TLS certificate
-func WithTLSCert(certificate *x509.Certificate) Option {
+func WithTLSCert(certificate *sm2.Certificate) Option {
 	return func(p *Peer) error {
 		p.certificate = certificate
 
