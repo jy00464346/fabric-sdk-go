@@ -3,6 +3,7 @@ Copyright IBM Corp. All Rights Reserved.
 
 SPDX-License-Identifier: Apache-2.0
 */
+
 /*
 Notice: This file has been modified for Hyperledger Fabric SDK Go usage.
 Please review third_party pinning scripts and patches for more details.
@@ -25,10 +26,12 @@ import (
 	log "github.com/hyperledger/fabric-sdk-go/internal/github.com/hyperledger/fabric-ca/sdkpatch/logbridge"
 	"github.com/hyperledger/fabric-sdk-go/internal/github.com/hyperledger/fabric/bccsp/gm"
 	"github.com/hyperledger/fabric-sdk-go/pkg/common/providers/core"
+	"github.com/hyperledger/fabric-sdk-go/pkg/core/cryptosuite/bccsp/wrapper"
 	"github.com/pkg/errors"
 	"github.com/tjfoc/gmsm/sm2"
 	gtls "github.com/tjfoc/gmtls"
 	"io/ioutil"
+	"reflect"
 	"strings"
 )
 
@@ -223,7 +226,7 @@ func ImportBCCSPKeyFromPEMBytes(keyBuff []byte, myCSP core.CryptoSuite, temporar
 	}
 	switch key.(type) {
 	case *sm2.PrivateKey:
-		log.Info("xxxx sm2.PrivateKey!!!!!!!!!!!")
+		log.Info("[csp] sm2.PrivateKey")
 		block, _ := pem.Decode(keyBuff)
 		priv, err := myCSP.KeyImport(block.Bytes, factory.GetGMSM2PrivateKeyImportOpts(temporary))
 		if err != nil {
@@ -363,4 +366,17 @@ func LoadX509KeyPairSM2(certFile, keyFile string, csp core.CryptoSuite) (*gtls.C
 	}
 
 	return cert, nil
+}
+
+func IsGmBccsp(csp core.CryptoSuite) bool {
+	if cs, ok := csp.(*wrapper.CryptoSuite); ok {
+		cspType := reflect.TypeOf(cs.BCCSP)
+		if cspType.Kind() == reflect.Ptr {
+			cspType = cspType.Elem()
+			if strings.HasPrefix(cspType.String(), "gm.impl") {
+				return true
+			}
+		}
+	}
+	return false
 }

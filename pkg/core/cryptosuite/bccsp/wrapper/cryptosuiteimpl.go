@@ -25,6 +25,11 @@ func GetKey(newkey bccsp.Key) core.Key {
 	return &key{newkey}
 }
 
+//GetKey returns implementation of of bccsp.Key
+func GetBCCSPKey(k core.Key) bccsp.Key {
+	return k.(*key).key
+}
+
 // CryptoSuite provides a wrapper of BCCSP
 type CryptoSuite struct {
 	BCCSP bccsp.BCCSP

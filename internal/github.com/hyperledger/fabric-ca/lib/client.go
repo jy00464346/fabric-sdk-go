@@ -3,6 +3,7 @@ Copyright IBM Corp. All Rights Reserved.
 
 SPDX-License-Identifier: Apache-2.0
 */
+
 /*
 Notice: This file has been modified for Hyperledger Fabric SDK Go usage.
 Please review third_party pinning scripts and patches for more details.
@@ -14,6 +15,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/hyperledger/fabric-sdk-go/pkg/core/cryptosuite/bccsp/wrapper"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -195,9 +197,13 @@ func (c *Client) GenCSR(req *api.CSRInfo, id string) ([]byte, core.Key, error) {
 
 	cr := c.newCertificateRequest(req)
 	cr.CN = id
-
+	isGmBccsp := util.IsGmBccsp(c.csp)
 	if (cr.KeyRequest == nil) || (cr.KeyRequest.Size() == 0 && cr.KeyRequest.Algo() == "") {
-		cr.KeyRequest = newCfsslBasicKeyRequest(api.NewBasicKeyRequest())
+		if isGmBccsp {
+			cr.KeyRequest = newCfsslBasicKeyRequest(&api.BasicKeyRequest{Algo: "gmsm2", Size: 256})
+		} else {
+			cr.KeyRequest = newCfsslBasicKeyRequest(api.NewBasicKeyRequest())
+		}
 	}
 
 	key, cspSigner, err := util.BCCSPKeyRequestGenerate(cr, c.csp)
@@ -205,8 +211,12 @@ func (c *Client) GenCSR(req *api.CSRInfo, id string) ([]byte, core.Key, error) {
 		log.Debugf("failed generating BCCSP key: %s", err)
 		return nil, nil, err
 	}
-
-	csrPEM, err := csr.Generate(cspSigner, cr)
+	var csrPEM []byte
+	if isGmBccsp {
+		csrPEM, err = generate(cspSigner, cr, wrapper.GetBCCSPKey(key))
+	} else {
+		csrPEM, err = csr.Generate(cspSigner, cr)
+	}
 	if err != nil {
 		log.Debugf("failed generating CSR: %s", err)
 		return nil, nil, err
